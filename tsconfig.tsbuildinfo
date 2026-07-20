@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/DriftPanel.tsx","./src/components/HealthBadge.tsx","./src/components/IngestPanel.tsx","./src/components/QueryPanel.tsx","./src/components/VoicePanel.tsx","./src/lib/api.ts","./src/lib/voiceRTC.ts"],"version":"5.9.3"}
