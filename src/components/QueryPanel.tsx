@@ -152,12 +152,12 @@ function QueryResult({ result }: { result: QueryResponse }) {
       )}
 
       <div className="section-label">
-        Citations {result.citations.length > 0 && `(${result.citations.length})`}
+        Citations {(result.citations || []).length > 0 && `(${(result.citations || []).length})`}
       </div>
-      {result.citations.length === 0 ? (
+      {(result.citations || []).length === 0 ? (
         <div className="empty">No clauses were cited for this answer.</div>
       ) : (
-        result.citations.map((c, i) => (
+        (result.citations || []).map((c, i) => (
           <div className="citation" key={i}>
             <div className="citation-clause">{c.clause}</div>
             <div className="citation-meta">
