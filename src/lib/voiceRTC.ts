@@ -230,9 +230,9 @@ export function useVoiceRTC({ bootstrapUrl, wsBaseUrl }: UseVoiceRTCOptions) {
     [wsBaseUrl, cleanup, handleMessage, isActive]
   );
 
-  const createPeerConnection = useCallback(() => {
+  const createPeerConnection = useCallback((iceServers: RTCIceServer[]) => {
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
+      iceServers,
     });
 
     pc.addEventListener("icecandidate", (event) => {
@@ -330,7 +330,29 @@ export function useVoiceRTC({ bootstrapUrl, wsBaseUrl }: UseVoiceRTCOptions) {
 
       await openSocket(session);
 
-      const pc = createPeerConnection();
+      // Fetch dynamic time-limited TURN credentials from Dograh backend
+      let iceServers: RTCIceServer[] = [{ urls: ["stun:stun.l.google.com:19302"] }];
+      try {
+        const turnResp = await fetch(`${wsBaseUrl}/api/v1/turn/credentials`, {
+          headers: {
+            "Authorization": `Bearer ${session.token}`
+          }
+        });
+        if (turnResp.ok) {
+          const turnData = await turnResp.json();
+          if (turnData.uris && turnData.uris.length > 0) {
+            iceServers.push({
+              urls: turnData.uris,
+              username: turnData.username,
+              credential: turnData.password
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch TURN credentials, falling back to STUN:", e);
+      }
+
+      const pc = createPeerConnection(iceServers);
       let stream: MediaStream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
